@@ -1,0 +1,79 @@
+// Tham số hình học của robot
+#e := 40.0;    // end effector
+#f := 60.0;    // base equilateral triangle side
+#re := 380.0; // lower arm length
+#rf := 150.0; // upper arm length
+
+// Định nghĩa các hằng số với độ chính xác cao hơn
+#pi := 3.14159265358979323846;
+#sqrt3 := 1.73205080756887729352;
+#cos120 := -0.5;
+#sin120 := #sqrt3 / 2.0;
+#tan30 := 1 / #sqrt3;  // tan(30°) = 1 / sqrt(3)
+
+// Tính các giá trị trung gian cho theta1
+#y1 := -0.5 * #tan30 * #f;
+#y0_temp := #y0 - 0.5 * #tan30 * #e;  // Sử dụng tan30 thay cho 0.57735
+#a := (#x0 * #x0 + #y0_temp * #y0_temp + #z0 * #z0 + #rf * #rf - #re * #re - #y1 * #y1) / (2 * #z0);
+#b := (#y1 - #y0_temp) / #z0;
+#d := - (#a + #b * #y1) * (#a + #b * #y1) + #rf * (#b * #b * #rf + #rf);
+
+// Kiểm tra nếu điểm không tồn tại
+IF #d < 0 THEN
+    #status := -1; // Điểm không tồn tại
+    RETURN;
+END_IF;
+
+// Tính theta1
+#yj := (#y1 - #a * #b - SQRT(#d)) / (#b * #b + 1);
+#zj := #a + #b * #yj;
+#thetado1 := 180.0 * ATAN(- #zj / (#y1 - #yj)) / #pi;
+IF #yj > #y1 THEN
+    #thetado1 := #thetado1 + 180.0;
+END_IF;
+
+// Tính theta2 (quay 120 độ)
+#x0_rot := #x0 * #cos120 + #y0 * #sin120;
+#y0_rot := #y0 * #cos120 - #x0 * #sin120;
+
+// Tính lại các giá trị trung gian cho theta2
+#y1 := -0.5 * #tan30 * #f;
+#y0_temp := #y0_rot - 0.5 * #tan30 * #e;  // Thay 0.57735 bằng #tan30
+#a := (#x0_rot * #x0_rot + #y0_temp * #y0_temp + #z0 * #z0 + #rf * #rf - #re * #re - #y1 * #y1) / (2 * #z0);
+#b := (#y1 - #y0_temp) / #z0;
+#d := - (#a + #b * #y1) * (#a + #b * #y1) + #rf * (#b * #b * #rf + #rf);
+
+IF #d >= 0 THEN
+    #yj := (#y1 - #a * #b - SQRT(#d)) / (#b * #b + 1);
+    #zj := #a + #b * #yj;
+    #thetado2 := 180.0 * ATAN(- #zj / (#y1 - #yj)) / #pi;
+    IF #yj > #y1 THEN
+        #thetado2 := #thetado2 + 180.0;
+    END_IF;
+ELSE
+    #status := -1; // Điểm không tồn tại
+    RETURN;
+END_IF;
+
+// Tính theta3 (quay thêm 120 độ nữa)
+#x0_rot := #x0 * #cos120 - #y0 * #sin120;
+#y0_rot := #y0 * #cos120 + #x0 * #sin120;
+
+// Tính lại các giá trị trung gian cho theta3
+#y1 := -0.5 * #tan30 * #f;
+#y0_temp := #y0_rot - 0.5 * #tan30 * #e;  // Thay 0.57735 bằng #tan30
+#a := (#x0_rot * #x0_rot + #y0_temp * #y0_temp + #z0 * #z0 + #rf * #rf - #re * #re - #y1 * #y1) / (2 * #z0);
+#b := (#y1 - #y0_temp) / #z0;
+#d := - (#a + #b * #y1) * (#a + #b * #y1) + #rf * (#b * #b * #rf + #rf);
+
+IF #d >= 0 THEN
+    #yj := (#y1 - #a * #b - SQRT(#d)) / (#b * #b + 1);
+    #zj := #a + #b * #yj;
+    #thetado3 := 180.0 * ATAN(- #zj / (#y1 - #yj)) / #pi;
+    IF #yj > #y1 THEN
+        #thetado3 := #thetado3 + 180.0;
+    END_IF;
+ELSE
+    #status := -1; // Điểm không tồn tại
+    RETURN;
+END_IF;
