@@ -1,0 +1,73 @@
+// Tham số hình học của robot
+#e := 40.0;    // end effector
+#f := 60.0;    // base
+#re := 380.0;
+#rf := 150.0;
+// constants
+
+#sqrt := SQRT(3.0);
+#pi := 3.141592653;
+#sin120 := #sqrt / 2.0;
+#cos120 := -0.5;
+#tan60 := #sqrt;
+#sin30 := 0.5;
+#tan30 := 1.0 / #sqrt;
+
+// Tính toán trước một số giá trị
+#t := (#f - #e) * #tan30 / 2.0;
+#dtr := #pi / 180.0;
+
+// Chuyển đổi từ độ sang radian
+#theta1 := #thetado1 * #dtr;
+#theta2 := #thetado2 * #dtr;
+#theta3 := #thetado3 * #dtr;
+
+// Tính toán tọa độ cho theta1
+#y1 := - (#t + #rf * COS(#theta1));
+#z1 := - #rf * SIN(#theta1);
+
+// Tính toán tọa độ cho theta2
+#y2 := (#t + #rf * COS(#theta2)) * #sin30;
+#x2 := #y2 * #tan60;
+#z2 := - #rf * SIN(#theta2);
+
+// Tính toán tọa độ cho theta3
+#y3 := (#t + #rf * COS(#theta3)) * #sin30;
+#x3 := - #y3 * #tan60;
+#z3 := - #rf * SIN(#theta3);
+
+// Tính toán dnm
+#dnm := (#y2 - #y1) * #x3 - (#y3 - #y1) * #x2;
+
+// Tính toán w1, w2, w3
+#w1 := #y1 * #y1 + #z1 * #z1;
+#w2 := #x2 * #x2 + #y2 * #y2 + #z2 * #z2;
+#w3 := #x3 * #x3 + #y3 * #y3 + #z3 * #z3;
+
+// Tính toán a1, b1
+#a1 := (#z2 - #z1) * (#y3 - #y1) - (#z3 - #z1) * (#y2 - #y1);
+#b1 := - ((#w2 - #w1) * (#y3 - #y1) - (#w3 - #w1) * (#y2 - #y1)) / 2.0;
+
+// Tính toán a2, b2
+#a2 := - (#z2 - #z1) * #x3 + (#z3 - #z1) * #x2;
+#b2 := ((#w2 - #w1) * #x3 - (#w3 - #w1) * #x2) / 2.0;
+
+// Tính toán a, b, c cho phương trình bậc hai
+#a := #a1 * #a1 + #a2 * #a2 + #dnm * #dnm;
+#b := 2 * (#a1 * #b1 + #a2 * (#b2 - #y1 * #dnm) - #z1 * #dnm * #dnm);
+#c := (#b2 - #y1 * #dnm) * (#b2 - #y1 * #dnm) + #b1 * #b1 + #dnm * #dnm * (#z1 * #z1 - #re * #re);
+
+// Tính discriminant
+#d := #b * #b - 4.0 * #a * #c;
+
+// Kiểm tra nếu không tồn tại nghiệm
+IF #d < 0 THEN
+    #z0 := 0.0;   // Lỗi, không có vị trí hợp lệ
+    #x0 := 0.0;
+    #y0 := 0.0;
+ELSE
+    // Tính nghiệm của phương trình bậc hai
+    #z0 := -0.5 * (#b + SQRT(#d)) / #a;
+    #x0 := (#a1 * #z0 + #b1) / #dnm;
+    #y0 := (#a2 * #z0 + #b2) / #dnm;
+END_IF;
